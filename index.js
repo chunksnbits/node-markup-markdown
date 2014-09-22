@@ -16,9 +16,9 @@ MarkdownParser.parse = function(text, options) {
 };
 
 MarkdownParser.lookupReplacement = function(key, options) {
-  if (/^:/.test(key)) {
-    return options.markup[key.replace(':','')];
-  }
+  _.each(options.markup, function(value, name) {
+    key = key.replace(':' + name, value);
+  });
   return key;
 };
 
@@ -55,16 +55,14 @@ MarkdownParser.applyProcessors = function (text, options) {
 
 MarkdownParser.applyRules = function (text, options) {
   (options.rules || []).forEach(function(rule) {
-    var replacement = MarkdownParser.lookupReplacement(rule.replacement, options);
-
-    if (_.isFunction(replacement)) {
+    if (_.isFunction(rule.replacement)) {
       var matches = text.match(rule.pattern);
       if (matches) {
-        text = replacement(text, matches, options);
+        text = rule.replacement(text, matches, options);
       }
     }
     else {
-      text = text.replace(rule.pattern, replacement);
+      text = text.replace(rule.pattern, MarkdownParser.lookupReplacement(rule.replacement, options));
     }
   });
   return text;
