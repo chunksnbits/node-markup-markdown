@@ -89,10 +89,10 @@ module.exports = {
     //   pattern: /  [*+-] ([^*+-<]*)/gm,
     //   replacement: '<ul><ul><li>$1</li></ul></ul>'
     // }, {
-      pattern: /[*+-] ([^*+-<]*)/gm,
+      pattern: /[*+-] ([^*+-<\n]+)(?:\n|$)/gm,
       replacement: '<ul><li>$1</li></ul>'
     }, {
-      pattern: /\n{0,1}<\/ul>\n{0,1}<ul>/gm,
+      pattern: /<\/ul><ul>/gm,
       replacement: ''
     }, {
       pattern: /#{6}[ ]*([^#\n<]+)/g,
@@ -127,6 +127,5 @@ module.exports = {
     }, {
       pattern: /!!!linebreak!!!/g,
       replacement: '\n'
-  }],
-  processors: []
+  }]
 };

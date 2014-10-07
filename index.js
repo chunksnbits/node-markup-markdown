@@ -9,7 +9,6 @@ function MarkdownParser () {}
 MarkdownParser.parse = function(text, options) {
   options = _.extend({}, defaults, options);
 
-  text = MarkdownParser.applyProcessors(text, options);
   text = MarkdownParser.applyRules(text, options);
 
   return text;
@@ -22,47 +21,61 @@ MarkdownParser.lookupReplacement = function(key, options) {
   return key;
 };
 
-MarkdownParser.applyProcessors = function (text, options) {
-  (options.processors || []).forEach(function(processor) {
-    // Add an empty line before and after
-    // to allow easier processing.
-    var lines = text.split('\n');
-    lines.splice(0,0,'');
-    lines.push('');
-
-    // Create a status object, that will be available for each processor
-    // using the this context object.
-    var status = _.extend({
-      options: _.clone(options)
-    }, {
-      text: _.clone(text)
-    }, {
-      lines: lines
-    });
-
-
-    lines.forEach(function(line, index) {
-      lines[index] = processor.apply(status, [line, index]);
-    });
-
-    lines.shift();
-    lines.pop();
-
-    text = lines.join('\n');
-  });
-  return text;
-};
-
 MarkdownParser.applyRules = function (text, options) {
   (options.rules || []).forEach(function(rule) {
-    if (_.isFunction(rule.replacement)) {
-      var matches = text.match(rule.pattern);
-      if (matches) {
-        text = rule.replacement(text, matches, options);
-      }
+
+
+    // Rules can be specified multiple ways:
+    //
+    // 1. Providing an object in the form:
+    //
+    //   {
+    //     // Will be evaluated using regex
+    //     pattern: /some-regex-pattern/g,
+    //     replacement: 'some-text-replacement'
+    //   }
+    //
+    // 2. Providing a function for pattern and/or replacement:
+    //
+    //   {
+    //     // Expects an array following the the standard set
+    //     // by String.prototype match
+    //     //   https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String/match
+    //     // as return value
+    //     pattern: function (text, matches, options) { ... },
+    //
+    //     // Expects a string value as return value
+    //     replacement: function (text, matches, options) { ... }
+    //   }
+    //
+    // 3. Providing a function for pattern and/or replacement:
+    //
+    //   {
+    //     // Expects a string value as return value
+    //     function (text, matches, options) { ... }
+    //   }
+    //
+    if (_.isFunction(rule)) {
+      text = rule(text, matches, options);
     }
     else {
-      text = text.replace(rule.pattern, MarkdownParser.lookupReplacement(rule.replacement, options));
+      var matches = [];
+
+      if (_.isFunction(rule.pattern)) {
+        matches = rule.pattern(text, matches, options);
+      }
+      else {
+        matches = text.match(rule.pattern);
+      }
+
+      if (matches && matches.length > 0) {
+        if (_.isFunction(rule.replacement)) {
+          text = rule.replacement(text, matches, options);
+        }
+        else {
+          text = text.replace(rule.pattern, MarkdownParser.lookupReplacement(rule.replacement, options));
+        }
+      }
     }
   });
   return text;
