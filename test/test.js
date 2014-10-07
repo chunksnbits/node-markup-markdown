@@ -14,8 +14,7 @@ describe('node-markup-markdown using custom rules', function () {
   beforeEach(function () {
     options = {
       markup: {},
-      rules: [],
-      processors: []
+      rules: []
     };
   });
 
@@ -74,72 +73,6 @@ describe('node-markup-markdown using custom rules', function () {
   });
 });
 
-describe('node-markup-markdown using custom processors', function () {
-
-  // Empty ruleset container
-  // Will be customized for each test
-  var options;
-
-  beforeEach(function () {
-    options = {
-      markup: {},
-      rules: [],
-      processors: []
-    };
-  });
-
-
-  it('parses custom processors', function () {
-    options.processors = [
-      function(line) {
-        return line.replace(/\*\*([^*\n]+)\*\*/g, '<strong>$1</strong>');
-      },
-      function(line) {
-        return line.replace(/\*([^*\n]+)\*/g, '<em>$1</em>');
-      }
-    ];
-
-    assert.equal(Markdown.parse('My text with **bold** and\n*italic* markup', options), 'My text with <strong>bold</strong> and\n<em>italic</em> markup');
-  });
-
-  it('allows to set a state for custom processors', function () {
-    options.processors = [
-      function(line) {
-        this.counter = this.counter || 0;
-        return line + this.counter++;
-      }
-    ];
-
-    assert.equal(Markdown.parse('My\ntext\nwith\n**bold**\nand\n*italic*\nmarkup', options), 'My1\ntext2\nwith3\n**bold**4\nand5\n*italic*6\nmarkup7');
-  });
-
-  it('allows access to the whole text for custom processors', function () {
-    options.processors = [
-      function(line) {
-        return this.text;
-      }
-    ];
-
-    assert.equal(Markdown.parse('My\ntext\nmarkup', options), 'My\ntext\nmarkup\nMy\ntext\nmarkup\nMy\ntext\nmarkup');
-  });
-
-  it('allows access to the configuration options for custom processors', function () {
-    options.processors = [
-      function(line) {
-        return this.options.markup.pattern + ':' + this.options.markup.replacement;
-      }
-    ];
-
-    options.markup = {
-      pattern: 'foo',
-      replacement: 'bar'
-    };
-
-    assert.equal(Markdown.parse('test', options), 'foo:bar');
-  });
-
-});
-
 describe('node-markup-markdown using default rules and processors', function () {
 
   // Empty ruleset container
@@ -149,8 +82,7 @@ describe('node-markup-markdown using default rules and processors', function () 
   beforeEach(function () {
     options = {
       markup: {},
-      rules: [],
-      processors: []
+      rules: []
     };
   });
 
@@ -258,7 +190,7 @@ describe('node-markup-markdown using default options', function () {
   });
 
   it('parses multiple lists', function () {
-    assert.equal(Markdown.parse('* First\n\n\n* First\n* Second'), '<ul><li>First</li></ul><p><ul><li>First</li><li>Second</li></ul>');
+    assert.equal(Markdown.parse('* First\n\n\n* First\n* Second'), '<ul><li>First</li></ul><br><ul><li>First</li><li>Second</li></ul>');
   });
 
   it('parses linebreaks', function () {
@@ -266,6 +198,6 @@ describe('node-markup-markdown using default options', function () {
   });
 
   it('parses spacers', function () {
-    assert.equal(Markdown.parse('My\n\nlinebreak'), 'My<p>linebreak');
+    assert.equal(Markdown.parse('My\n\nlinebreak'), 'My<br><br>linebreak');
   });
 });
