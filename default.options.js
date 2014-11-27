@@ -116,7 +116,7 @@ module.exports = {
       pattern: /\[(.*)\]\[(.*)\]/g,
       replacement: ':anchor'
     }, {
-      pattern: /\[([^\\]*)\]\(([^)]*)\)/g,
+      pattern: /\[([^\]]*)\]\(([^)]*)\)/g,
       replacement: ':link'
     }, {
       pattern: /\n</g,
